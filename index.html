@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Workbench</title>
+  <style>
+    body {
+      margin: 0;
+      background: #1e1e1e;
+      color: #fff;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    canvas {
+      background: #2d2d2d;
+      border: 2px solid #444;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      cursor: crosshair;
+    }
+    .toolbar {
+      margin-bottom: 10px;
+    }
+    button {
+      background: #007acc;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      margin: 0 5px;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:active { background: #005999; }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <span id="info">Tap canvas to place items</span>
+    <button onclick="clearCanvas()">Clear</button>
+  </div>
+
+  <canvas id="workbench" width="400" height="400"></canvas>
+
+  <script>
+    const canvas = document.getElementById('workbench');
+    const ctx = canvas.getContext('2d');
+    let items = [];
+
+    // Resize canvas nicely for mobile screens
+    function resize() {
+      const size = Math.min(window.innerWidth - 40, 400);
+      canvas.width = size;
+      canvas.height = size;
+      draw();
+    }
+    window.addEventListener('resize', resize);
+
+    // Handle touch/clicks to spawn interactive elements
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      items.push({ x, y, radius: 15, color: '#' + Math.floor(Math.random()*16777215).toString(16) });
+      draw();
+    });
+
+    function draw() {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw grid lines
+      ctx.strokeStyle = '#353535';
+      ctx.lineWidth = 1;
+      for(let i = 0; i < canvas.width; i += 40) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+      }
+
+      // Draw spawned items
+      items.forEach(item => {
+        ctx.beginPath();
+        ctx.arc(item.x, item.y, item.radius, 0, Math.PI * 2);
+        ctx.fillStyle = item.color;
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#fff';
+        ctx.stroke();
+      });
+    }
+
+    function clearCanvas() {
+      items = [];
+      draw();
+    }
+
+    resize();
+  </script>
+</body>
+  </html>
